@@ -104,6 +104,7 @@
       display: flex;
       justify-content: flex-end;
       align-items: center;
+      gap: 14px;
       margin-bottom: 12px;
     }
 
@@ -517,7 +518,7 @@
   <!-- Top bar -->
   <div class="top-bar">
     <div class="title-area">
-      <h1 id="timetableTitle" contenteditable="true" spellcheck="false" title="Klikni za urejanje naslova">FRI 2026/2027, zimski semester</h1>
+      <h1 id="timetableTitle" contenteditable="true" spellcheck="false" title="Klikni za urejanje naslova">FRI Zimski Semester 2026/2027</h1>
     </div>
     <div class="top-actions">
       <button class="btn-help" id="helpBtn" title="Kako uporabljati urnik" aria-label="Pomoč">?</button>
@@ -529,6 +530,9 @@
 
   <div class="controls-bar">
     <button class="btn-reset" id="resetBtn">Ponastavi na privzet urnik</button>
+    <button class="btn-reset" id="exportBtn">Izvozi urnik (.json)</button>
+    <button class="btn-reset" id="importBtn">Uvozi urnik (.json)</button>
+    <input type="file" id="importFile" accept="application/json,.json" style="display: none;">
   </div>
 
   <!-- Timetable container -->
@@ -652,7 +656,7 @@
     const TOTAL_HOURS = END_HOUR - START_HOUR;
     const HOUR_HEIGHT = 46;
     const SNAP_MINUTES = 30; // grid has hour + half-hour lines
-    const STORAGE_KEY = 'FRI_TIMETABLE_EVENTS_V3';
+    const STORAGE_KEY = 'FRI_TIMETABLE_EVENTS_V4';
     const TITLE_STORAGE_KEY = 'FRI_TIMETABLE_TITLE';
 
     const DAYS = ['ponedeljek', 'torek', 'sreda', 'četrtek', 'petek'];
@@ -674,127 +678,204 @@
 
     /* Initial state matching user screenshot */
     const DEFAULT_EVENTS = [
-      {
-        id: '1',
-        title: 'UZ_P',
-        type: 'P',
-        room: 'P01',
-        lecturer: 'Matej Kristan',
-        day: 0,
-        startMinutes: 8 * 60,
-        endMinutes: 11 * 60,
-        color: '#d39fe6',
-        info: '3_BUN-ML_UZ(63267)\n3_BUN-RI_UZ(63267)\n3_BUN-RM_UZ(63267)\n63267_PAD'
-      },
-      {
-        id: '2',
-        title: 'IS(63266)_LV',
-        type: 'LV',
-        room: 'PR16',
-        lecturer: 'Tadej Škvorc',
-        day: 0,
-        startMinutes: 11 * 60,
-        endMinutes: 13 * 60,
-        color: '#a9dfbf',
-        info: '3_BUN-RM_IS(63266)_LV_01\n3_BUN-RM_IS(63266)_LV_02'
-      },
-      {
-        id: '3',
-        title: 'OUI_LV',
-        type: 'LV',
-        room: 'PR16',
-        lecturer: 'Petar Vračar',
-        day: 0,
-        startMinutes: 13 * 60,
-        endMinutes: 15 * 60,
-        color: '#c9cbe8',
-        info: '3_BUN-RM_LV_01\n3_BUN-RM_LV_03'
-      },
-      {
-        id: '4',
-        title: 'IS(63266)_P',
-        type: 'P',
-        room: 'P22',
-        lecturer: 'Marko Robnik Šikonja',
-        day: 0,
-        startMinutes: 14 * 60,
-        endMinutes: 17 * 60,
-        color: '#fcf4a3',
-        info: '2_BMA-DJ_IS(63266)\n3_BUN-RI_IS(63266)\n3_BUN-RM_IS(63266)\n63266_PAD'
-      },
-      {
-        id: '5',
-        title: 'RGTI_P',
-        type: 'P',
-        room: 'P22',
-        lecturer: 'Matija Marolt',
-        day: 1,
-        startMinutes: 11 * 60,
-        endMinutes: 13 * 60,
-        color: '#fcd1db',
-        info: '3_BUN-ML\n3_BUN-RI_RGTI(63269)\n3_BUN-RM_RGTI(63269)\n3_BUN-UI_RGTI(63269)\n63269_PAD'
-      },
-      {
-        id: '6',
-        title: 'PRPO_LV',
-        type: 'LV',
-        room: 'PR06',
-        lecturer: 'PROSTO PROSTO',
-        day: 1,
-        startMinutes: 14 * 60,
-        endMinutes: 17 * 60,
-        color: '#a3c7e8',
-        info: 'rezervirano rezervirano\n3_BUN-RM_PRPO(63254)_LV_01\n3_BUN-RM_PRPO(63254)_LV_02'
-      },
-      {
-        id: '7',
-        title: 'UZ_LV',
-        type: 'LV',
-        room: 'PR09',
-        lecturer: 'Jer Pelhan',
-        day: 2,
-        startMinutes: 8 * 60,
-        endMinutes: 11 * 60,
-        color: '#d9d9d9',
-        info: '3_BUN-RM_UZ(63267)_LV_01\n3_BUN-RM_UZ(63267)_LV_02'
-      },
-      {
-        id: '8',
-        title: 'OUI_P',
-        type: 'P',
-        room: 'P01',
-        lecturer: 'Petar Vračar',
-        day: 2,
-        startMinutes: 11 * 60,
-        endMinutes: 14 * 60,
-        color: '#fa9d93',
-        info: '1_BMA-DJ_OUI(63214)\n3_BUN-ML\n3_BUN-RI\n3_BUN-RM\n63214_PAD'
-      },
-      {
-        id: '9',
-        title: 'RGTI_LV',
-        type: 'LV',
-        room: 'PR15',
-        lecturer: 'rezervirano rezervirano',
-        day: 2,
-        startMinutes: 13 * 60,
-        endMinutes: 15 * 60,
-        color: '#d8f3b2',
-        info: '3_BUN-RM_RGTI(63269)_LV_01'
-      },
-      {
-        id: '10',
-        title: 'PRPO_P',
-        type: 'P',
-        room: 'P20',
-        lecturer: 'Matjaž Jurič',
-        day: 2,
-        startMinutes: 14 * 60,
-        endMinutes: 17 * 60,
-        color: '#f9be7d',
-        info: '3_BUN-RI_PRPO(63254)\n3_BUN-RM_PRPO(63254)\n63254_PAD'
-      }
-    ];
+    {
+        "id":  "1",
+        "title":  "Umetno Zaznavanje",
+        "type":  "P",
+        "room":  "P01",
+        "lecturer":  "Matej Kristan",
+        "day":  0,
+        "startMinutes":  480,
+        "endMinutes":  660,
+        "color":  "#d39fe6",
+        "info":  ""
+    },
+    {
+        "id":  "2",
+        "title":  "Inteligentni Sistemi",
+        "type":  "LV",
+        "room":  "PR16",
+        "lecturer":  "Tadej Škvorc",
+        "day":  2,
+        "startMinutes":  1020,
+        "endMinutes":  1140,
+        "color":  "#a9dfbf",
+        "info":  "",
+        "lane":  0
+    },
+    {
+        "id":  "3",
+        "title":  "Osnove Umetne Inteligence",
+        "type":  "LV",
+        "room":  "PR16",
+        "lecturer":  "Petar Vračar",
+        "day":  1,
+        "startMinutes":  780,
+        "endMinutes":  900,
+        "color":  "#c9cbe8",
+        "info":  "",
+        "lane":  0
+    },
+    {
+        "id":  "4",
+        "title":  "Inteligentni Sistemi",
+        "type":  "P",
+        "room":  "P22",
+        "lecturer":  "Marko Robnik Šikonja",
+        "day":  0,
+        "startMinutes":  840,
+        "endMinutes":  1020,
+        "color":  "#fcf4a3",
+        "info":  ""
+    },
+    {
+        "id":  "5",
+        "title":  "Rač. grafika in tehnologija iger",
+        "type":  "P",
+        "room":  "P22",
+        "lecturer":  "Matija Marolt",
+        "day":  0,
+        "startMinutes":  660,
+        "endMinutes":  840,
+        "color":  "#fcd1db",
+        "info":  "",
+        "lane":  1
+    },
+    {
+        "id":  "6",
+        "title":  "Postopki Razvoja Prog. Opreme",
+        "type":  "LV",
+        "room":  "PR06",
+        "lecturer":  "???",
+        "day":  1,
+        "startMinutes":  900,
+        "endMinutes":  1020,
+        "color":  "#a3c7e8",
+        "info":  "",
+        "lane":  0
+    },
+    {
+        "id":  "7",
+        "title":  "Umetno Zaznavanje",
+        "type":  "LV",
+        "room":  "PR09",
+        "lecturer":  "Jer Pelhan",
+        "day":  2,
+        "startMinutes":  480,
+        "endMinutes":  600,
+        "color":  "#d9d9d9",
+        "info":  ""
+    },
+    {
+        "id":  "8",
+        "title":  "Osnove Umetne Inteligence",
+        "type":  "P",
+        "room":  "P01",
+        "lecturer":  "Petar Vračar",
+        "day":  2,
+        "startMinutes":  660,
+        "endMinutes":  840,
+        "color":  "#fa9d93",
+        "info":  ""
+    },
+    {
+        "id":  "9",
+        "title":  "Rač. grafika in tehnologija iger",
+        "type":  "LV",
+        "room":  "PR15",
+        "lecturer":  "Hmmmmm???",
+        "day":  0,
+        "startMinutes":  960,
+        "endMinutes":  1080,
+        "color":  "#d8f3b2",
+        "info":  "",
+        "lane":  1
+    },
+    {
+        "id":  "10",
+        "title":  "Postopki Razvoja Prog. Opreme",
+        "type":  "P",
+        "room":  "P20",
+        "lecturer":  "Matjaž Jurič",
+        "day":  2,
+        "startMinutes":  840,
+        "endMinutes":  1020,
+        "color":  "#f9be7d",
+        "info":  ""
+    },
+    {
+        "id":  "ev_1790687584393_a4j95",
+        "title":  "Verejetnostni Račun in Statistika",
+        "type":  "LV",
+        "room":  "2.04",
+        "lecturer":  "Lazić",
+        "info":  "",
+        "day":  3,
+        "startMinutes":  480,
+        "endMinutes":  600,
+        "color":  "#74c0e7"
+    },
+    {
+        "id":  "ev_1790687694209_g1fqt",
+        "title":  "Numerične Metode",
+        "type":  "LV",
+        "room":  "3.05",
+        "lecturer":  "Šadl Praprotnik",
+        "info":  "",
+        "day":  3,
+        "startMinutes":  900,
+        "endMinutes":  960,
+        "color":  "#f7febe"
+    },
+    {
+        "id":  "ev_1790687898497_3whi4",
+        "title":  "Numerične Metode",
+        "type":  "LV",
+        "room":  "3.11",
+        "lecturer":  "Šadl Praprotnik",
+        "info":  "",
+        "day":  3,
+        "startMinutes":  960,
+        "endMinutes":  1080,
+        "color":  "#fcf4a3"
+    },
+    {
+        "id":  "ev_1790687921331_oyogd",
+        "title":  "Kolokvij",
+        "type":  "",
+        "room":  "2.05",
+        "lecturer":  "",
+        "info":  "",
+        "day":  3,
+        "startMinutes":  1080,
+        "endMinutes":  1200,
+        "color":  "#f9be7d"
+    },
+    {
+        "id":  "ev_1790687953463_eixle",
+        "title":  "Verjetnostni Račun in Statistika",
+        "type":  "P",
+        "room":  "3.04",
+        "lecturer":  "Drnovšek",
+        "info":  "",
+        "day":  4,
+        "startMinutes":  780,
+        "endMinutes":  900,
+        "color":  "#d8f3b2"
+    },
+    {
+        "id":  "ev_1790687992469_gkwpd",
+        "title":  "Numerične Metode",
+        "type":  "P",
+        "room":  "2.04",
+        "lecturer":  "Žagar E.",
+        "info":  "",
+        "day":  4,
+        "startMinutes":  600,
+        "endMinutes":  780,
+        "color":  "#fcd1db"
+    }
+];
 
     /* Application State */
     let events = [];
@@ -1449,6 +1530,56 @@
         events = cloneDefaultEvents();
         saveEvents();
       }
+    };
+
+    /* Export events to a .json file */
+    document.getElementById('exportBtn').onclick = () => {
+      const data = {
+        title: document.getElementById('timetableTitle').innerText.trim(),
+        events: events
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'urnik.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    /* Import events from a .json file */
+    document.getElementById('importBtn').onclick = () => {
+      document.getElementById('importFile').click();
+    };
+
+    document.getElementById('importFile').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (Array.isArray(data)) {
+            events = data;
+          } else if (data && Array.isArray(data.events)) {
+            events = data.events;
+            if (data.title) {
+              document.getElementById('timetableTitle').innerText = data.title;
+              localStorage.setItem(TITLE_STORAGE_KEY, data.title);
+            }
+          } else {
+            throw new Error('invalid');
+          }
+          saveEvents();
+          alert('Urnik uvožen.');
+        } catch (err) {
+          alert('Napaka: datoteka ni veljaven urnik (.json).');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
     };
 
     /* Editable title */
