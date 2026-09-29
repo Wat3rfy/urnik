@@ -975,12 +975,10 @@
 
     function setStatus() {
       const el = document.getElementById('statusMsg');
-      const btn = document.getElementById('publishBtn');
       if (el) {
         el.classList.toggle('dirty', dirty);
         el.textContent = dirty ? 'Nezhranjene spremembe' : '';
       }
-      if (btn) btn.disabled = !dirty;
     }
 
     function markDirty() {
@@ -1058,7 +1056,6 @@
     }
 
     async function publishEvents() {
-      if (!dirty) return;
       const token = getToken();
       if (!token) return;
 
@@ -1100,7 +1097,7 @@
       } catch (err) {
         alert('Napaka: ' + err.message);
       } finally {
-        if (btn) { btn.textContent = label; btn.disabled = !dirty; }
+        if (btn) btn.textContent = label;
       }
     }
 
