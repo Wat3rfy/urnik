@@ -658,6 +658,8 @@
     const SNAP_MINUTES = 30; // grid has hour + half-hour lines
     const STORAGE_KEY = 'FRI_TIMETABLE_EVENTS_V4';
     const TITLE_STORAGE_KEY = 'FRI_TIMETABLE_TITLE';
+    const DATA_VERSION_KEY = 'FRI_TIMETABLE_DATA_VERSION';
+    const DATA_URL = 'events.json';
 
     const DAYS = ['ponedeljek', 'torek', 'sreda', 'četrtek', 'petek'];
 
@@ -949,6 +951,32 @@
     function saveEvents() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
       renderTimetable();
+    }
+
+    /* Load the shared schedule from events.json (hosted only).
+       If the file's version is newer than what this device has, it replaces the local copy. */
+    async function syncFromServer() {
+      try {
+        const res = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data || !Array.isArray(data.events)) return;
+
+        const remoteVersion = Number(data.version) || 0;
+        const localVersion = Number(localStorage.getItem(DATA_VERSION_KEY)) || 0;
+        if (remoteVersion <= localVersion) return;
+
+        events = data.events;
+        if (data.title) {
+          document.getElementById('timetableTitle').innerText = data.title;
+          localStorage.setItem(TITLE_STORAGE_KEY, data.title);
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+        localStorage.setItem(DATA_VERSION_KEY, String(remoteVersion));
+        renderTimetable();
+      } catch (err) {
+        // file:// or offline — just keep the local copy
+      }
     }
 
     /* Initialize Grid Structure */
@@ -1532,9 +1560,10 @@
       }
     };
 
-    /* Export events to a .json file */
+    /* Export events to events.json (ready to upload to the site for all devices) */
     document.getElementById('exportBtn').onclick = () => {
       const data = {
+        version: Date.now(),
         title: document.getElementById('timetableTitle').innerText.trim(),
         events: events
       };
@@ -1542,7 +1571,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'urnik.json';
+      a.download = 'events.json';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1568,6 +1597,9 @@
             if (data.title) {
               document.getElementById('timetableTitle').innerText = data.title;
               localStorage.setItem(TITLE_STORAGE_KEY, data.title);
+            }
+            if (data.version) {
+              localStorage.setItem(DATA_VERSION_KEY, String(data.version));
             }
           } else {
             throw new Error('invalid');
@@ -1615,6 +1647,7 @@
       buildGrid();
       renderTimetable();
       setupDragInteraction();
+      syncFromServer();
     });
   </script>
 </body>
