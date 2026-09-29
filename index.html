@@ -108,6 +108,16 @@
       margin-bottom: 12px;
     }
 
+    .status-msg {
+      margin-right: auto;
+      font-size: 12px;
+      color: #b8860b;
+    }
+
+    .status-msg.dirty::before {
+      content: "● ";
+    }
+
     .btn-reset {
       font-size: 11px;
       color: #777;
@@ -115,6 +125,26 @@
       cursor: pointer;
       background: none;
       border: none;
+    }
+
+    .btn-publish {
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      background: #0056b3;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 14px;
+      cursor: pointer;
+    }
+
+    .btn-publish:hover {
+      background: #004085;
+    }
+
+    .btn-publish:disabled {
+      background: #9bb4d0;
+      cursor: default;
     }
 
     /* Timetable Grid */
@@ -529,9 +559,11 @@
   </div>
 
   <div class="controls-bar">
-    <button class="btn-reset" id="resetBtn">Ponastavi na privzet urnik</button>
-    <button class="btn-reset" id="exportBtn">Izvozi urnik (.json)</button>
-    <button class="btn-reset" id="importBtn">Uvozi urnik (.json)</button>
+    <span class="status-msg" id="statusMsg"></span>
+    <button class="btn-reset" id="resetBtn">Prekliči spremembe</button>
+    <button class="btn-reset" id="exportBtn">Izvozi kopijo</button>
+    <button class="btn-reset" id="importBtn">Uvozi</button>
+    <button class="btn-publish" id="publishBtn">Objavi</button>
     <input type="file" id="importFile" accept="application/json,.json" style="display: none;">
   </div>
 
@@ -656,10 +688,16 @@
     const TOTAL_HOURS = END_HOUR - START_HOUR;
     const HOUR_HEIGHT = 46;
     const SNAP_MINUTES = 30; // grid has hour + half-hour lines
-    const STORAGE_KEY = 'FRI_TIMETABLE_EVENTS_V4';
-    const TITLE_STORAGE_KEY = 'FRI_TIMETABLE_TITLE';
-    const DATA_VERSION_KEY = 'FRI_TIMETABLE_DATA_VERSION';
-    const DATA_URL = 'events.json';
+
+    /* GitHub storage — the schedule lives in this file in the repo.
+       Reads are public; writes need a token that only the owner's browser holds. */
+    const GH_OWNER = 'Wat3rfy';
+    const GH_REPO = 'urnik';
+    const GH_BRANCH = 'main';
+    const GH_FILE = 'events.json';
+    const GH_API_FILE = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
+    const GH_RAW_FILE = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${GH_FILE}`;
+    const GH_TOKEN_KEY = 'FRI_TIMETABLE_GH_TOKEN';
 
     const DAYS = ['ponedeljek', 'torek', 'sreda', 'četrtek', 'petek'];
 
@@ -681,203 +719,203 @@
     /* Initial state matching user screenshot */
     const DEFAULT_EVENTS = [
     {
-        "id":  "1",
-        "title":  "Umetno Zaznavanje",
-        "type":  "P",
-        "room":  "P01",
-        "lecturer":  "Matej Kristan",
-        "day":  0,
-        "startMinutes":  480,
-        "endMinutes":  660,
-        "color":  "#d39fe6",
-        "info":  ""
+      "id": "1",
+      "title": "Umetno Zaznavanje",
+      "type": "P",
+      "room": "P01",
+      "lecturer": "Matej Kristan",
+      "day": 0,
+      "startMinutes": 480,
+      "endMinutes": 660,
+      "color": "#d39fe6",
+      "info": ""
     },
     {
-        "id":  "2",
-        "title":  "Inteligentni Sistemi",
-        "type":  "LV",
-        "room":  "PR16",
-        "lecturer":  "Tadej Škvorc",
-        "day":  2,
-        "startMinutes":  1020,
-        "endMinutes":  1140,
-        "color":  "#a9dfbf",
-        "info":  "",
-        "lane":  0
+      "id": "2",
+      "title": "Inteligentni Sistemi",
+      "type": "LV",
+      "room": "PR16",
+      "lecturer": "Tadej Škvorc",
+      "day": 2,
+      "startMinutes": 1020,
+      "endMinutes": 1140,
+      "color": "#a9dfbf",
+      "info": "",
+      "lane": 0
     },
     {
-        "id":  "3",
-        "title":  "Osnove Umetne Inteligence",
-        "type":  "LV",
-        "room":  "PR16",
-        "lecturer":  "Petar Vračar",
-        "day":  1,
-        "startMinutes":  780,
-        "endMinutes":  900,
-        "color":  "#c9cbe8",
-        "info":  "",
-        "lane":  0
+      "id": "3",
+      "title": "Osnove Umetne Inteligence",
+      "type": "LV",
+      "room": "PR16",
+      "lecturer": "Petar Vračar",
+      "day": 1,
+      "startMinutes": 780,
+      "endMinutes": 900,
+      "color": "#c9cbe8",
+      "info": "",
+      "lane": 0
     },
     {
-        "id":  "4",
-        "title":  "Inteligentni Sistemi",
-        "type":  "P",
-        "room":  "P22",
-        "lecturer":  "Marko Robnik Šikonja",
-        "day":  0,
-        "startMinutes":  840,
-        "endMinutes":  1020,
-        "color":  "#fcf4a3",
-        "info":  ""
+      "id": "4",
+      "title": "Inteligentni Sistemi",
+      "type": "P",
+      "room": "P22",
+      "lecturer": "Marko Robnik Šikonja",
+      "day": 0,
+      "startMinutes": 840,
+      "endMinutes": 1020,
+      "color": "#fcf4a3",
+      "info": ""
     },
     {
-        "id":  "5",
-        "title":  "Rač. grafika in tehnologija iger",
-        "type":  "P",
-        "room":  "P22",
-        "lecturer":  "Matija Marolt",
-        "day":  0,
-        "startMinutes":  660,
-        "endMinutes":  840,
-        "color":  "#fcd1db",
-        "info":  "",
-        "lane":  1
+      "id": "5",
+      "title": "Rač. grafika in tehnologija iger",
+      "type": "P",
+      "room": "P22",
+      "lecturer": "Matija Marolt",
+      "day": 0,
+      "startMinutes": 660,
+      "endMinutes": 840,
+      "color": "#fcd1db",
+      "info": "",
+      "lane": 1
     },
     {
-        "id":  "6",
-        "title":  "Postopki Razvoja Prog. Opreme",
-        "type":  "LV",
-        "room":  "PR06",
-        "lecturer":  "???",
-        "day":  1,
-        "startMinutes":  900,
-        "endMinutes":  1020,
-        "color":  "#a3c7e8",
-        "info":  "",
-        "lane":  0
+      "id": "6",
+      "title": "Postopki Razvoja Prog. Opreme",
+      "type": "LV",
+      "room": "PR06",
+      "lecturer": "???",
+      "day": 1,
+      "startMinutes": 900,
+      "endMinutes": 1020,
+      "color": "#a3c7e8",
+      "info": "",
+      "lane": 0
     },
     {
-        "id":  "7",
-        "title":  "Umetno Zaznavanje",
-        "type":  "LV",
-        "room":  "PR09",
-        "lecturer":  "Jer Pelhan",
-        "day":  2,
-        "startMinutes":  480,
-        "endMinutes":  600,
-        "color":  "#d9d9d9",
-        "info":  ""
+      "id": "7",
+      "title": "Umetno Zaznavanje",
+      "type": "LV",
+      "room": "PR09",
+      "lecturer": "Jer Pelhan",
+      "day": 2,
+      "startMinutes": 480,
+      "endMinutes": 600,
+      "color": "#d9d9d9",
+      "info": ""
     },
     {
-        "id":  "8",
-        "title":  "Osnove Umetne Inteligence",
-        "type":  "P",
-        "room":  "P01",
-        "lecturer":  "Petar Vračar",
-        "day":  2,
-        "startMinutes":  660,
-        "endMinutes":  840,
-        "color":  "#fa9d93",
-        "info":  ""
+      "id": "8",
+      "title": "Osnove Umetne Inteligence",
+      "type": "P",
+      "room": "P01",
+      "lecturer": "Petar Vračar",
+      "day": 2,
+      "startMinutes": 660,
+      "endMinutes": 840,
+      "color": "#fa9d93",
+      "info": ""
     },
     {
-        "id":  "9",
-        "title":  "Rač. grafika in tehnologija iger",
-        "type":  "LV",
-        "room":  "PR15",
-        "lecturer":  "Hmmmmm???",
-        "day":  0,
-        "startMinutes":  960,
-        "endMinutes":  1080,
-        "color":  "#d8f3b2",
-        "info":  "",
-        "lane":  1
+      "id": "9",
+      "title": "Rač. grafika in tehnologija iger",
+      "type": "LV",
+      "room": "PR15",
+      "lecturer": "Hmmmmm???",
+      "day": 0,
+      "startMinutes": 960,
+      "endMinutes": 1080,
+      "color": "#d8f3b2",
+      "info": "",
+      "lane": 1
     },
     {
-        "id":  "10",
-        "title":  "Postopki Razvoja Prog. Opreme",
-        "type":  "P",
-        "room":  "P20",
-        "lecturer":  "Matjaž Jurič",
-        "day":  2,
-        "startMinutes":  840,
-        "endMinutes":  1020,
-        "color":  "#f9be7d",
-        "info":  ""
+      "id": "10",
+      "title": "Postopki Razvoja Prog. Opreme",
+      "type": "P",
+      "room": "P20",
+      "lecturer": "Matjaž Jurič",
+      "day": 2,
+      "startMinutes": 840,
+      "endMinutes": 1020,
+      "color": "#f9be7d",
+      "info": ""
     },
     {
-        "id":  "ev_1790687584393_a4j95",
-        "title":  "Verejetnostni Račun in Statistika",
-        "type":  "LV",
-        "room":  "2.04",
-        "lecturer":  "Lazić",
-        "info":  "",
-        "day":  3,
-        "startMinutes":  480,
-        "endMinutes":  600,
-        "color":  "#74c0e7"
+      "id": "ev_1790687584393_a4j95",
+      "title": "Verejetnostni Račun in Statistika",
+      "type": "LV",
+      "room": "2.04",
+      "lecturer": "Lazić",
+      "info": "",
+      "day": 3,
+      "startMinutes": 480,
+      "endMinutes": 600,
+      "color": "#74c0e7"
     },
     {
-        "id":  "ev_1790687694209_g1fqt",
-        "title":  "Numerične Metode",
-        "type":  "LV",
-        "room":  "3.05",
-        "lecturer":  "Šadl Praprotnik",
-        "info":  "",
-        "day":  3,
-        "startMinutes":  900,
-        "endMinutes":  960,
-        "color":  "#f7febe"
+      "id": "ev_1790687694209_g1fqt",
+      "title": "Numerične Metode",
+      "type": "LV",
+      "room": "3.05",
+      "lecturer": "Šadl Praprotnik",
+      "info": "",
+      "day": 3,
+      "startMinutes": 900,
+      "endMinutes": 960,
+      "color": "#f7febe"
     },
     {
-        "id":  "ev_1790687898497_3whi4",
-        "title":  "Numerične Metode",
-        "type":  "LV",
-        "room":  "3.11",
-        "lecturer":  "Šadl Praprotnik",
-        "info":  "",
-        "day":  3,
-        "startMinutes":  960,
-        "endMinutes":  1080,
-        "color":  "#fcf4a3"
+      "id": "ev_1790687898497_3whi4",
+      "title": "Numerične Metode",
+      "type": "LV",
+      "room": "3.11",
+      "lecturer": "Šadl Praprotnik",
+      "info": "",
+      "day": 3,
+      "startMinutes": 960,
+      "endMinutes": 1080,
+      "color": "#fcf4a3"
     },
     {
-        "id":  "ev_1790687921331_oyogd",
-        "title":  "Kolokvij",
-        "type":  "",
-        "room":  "2.05",
-        "lecturer":  "",
-        "info":  "",
-        "day":  3,
-        "startMinutes":  1080,
-        "endMinutes":  1200,
-        "color":  "#f9be7d"
+      "id": "ev_1790687921331_oyogd",
+      "title": "Kolokvij",
+      "type": "",
+      "room": "2.05",
+      "lecturer": "",
+      "info": "",
+      "day": 3,
+      "startMinutes": 1080,
+      "endMinutes": 1200,
+      "color": "#f9be7d"
     },
     {
-        "id":  "ev_1790687953463_eixle",
-        "title":  "Verjetnostni Račun in Statistika",
-        "type":  "P",
-        "room":  "3.04",
-        "lecturer":  "Drnovšek",
-        "info":  "",
-        "day":  4,
-        "startMinutes":  780,
-        "endMinutes":  900,
-        "color":  "#d8f3b2"
+      "id": "ev_1790687953463_eixle",
+      "title": "Verjetnostni Račun in Statistika",
+      "type": "P",
+      "room": "3.04",
+      "lecturer": "Drnovšek",
+      "info": "",
+      "day": 4,
+      "startMinutes": 780,
+      "endMinutes": 900,
+      "color": "#d8f3b2"
     },
     {
-        "id":  "ev_1790687992469_gkwpd",
-        "title":  "Numerične Metode",
-        "type":  "P",
-        "room":  "2.04",
-        "lecturer":  "Žagar E.",
-        "info":  "",
-        "day":  4,
-        "startMinutes":  600,
-        "endMinutes":  780,
-        "color":  "#fcd1db"
+      "id": "ev_1790687992469_gkwpd",
+      "title": "Numerične Metode",
+      "type": "P",
+      "room": "2.04",
+      "lecturer": "Žagar E.",
+      "info": "",
+      "day": 4,
+      "startMinutes": 600,
+      "endMinutes": 780,
+      "color": "#fcd1db"
     }
-];
+  ];
 
     /* Application State */
     let events = [];
@@ -928,54 +966,141 @@
       return JSON.parse(JSON.stringify(DEFAULT_EVENTS));
     }
 
-    function loadEvents() {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        try {
-          events = JSON.parse(stored);
-        } catch (e) {
-          events = cloneDefaultEvents();
-        }
-      } else {
-        events = cloneDefaultEvents();
+    /* ---- Persistence: the schedule lives in GitHub. Edits stay in memory only until published. ---- */
+    let dirty = false;
+
+    function currentTitle() {
+      return document.getElementById('timetableTitle').innerText.trim();
+    }
+
+    function setStatus() {
+      const el = document.getElementById('statusMsg');
+      const btn = document.getElementById('publishBtn');
+      if (el) {
+        el.classList.toggle('dirty', dirty);
+        el.textContent = dirty ? 'Nezhranjene spremembe' : '';
       }
+      if (btn) btn.disabled = !dirty;
     }
 
-    function loadTitle() {
-      const stored = localStorage.getItem(TITLE_STORAGE_KEY);
-      if (stored) {
-        document.getElementById('timetableTitle').innerText = stored;
+    function markDirty() {
+      dirty = true;
+      setStatus();
+    }
+
+    function utf8ToBase64(str) {
+      const bytes = new TextEncoder().encode(str);
+      let bin = '';
+      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin);
+    }
+
+    function base64ToUtf8(b64) {
+      const bin = atob(b64.replace(/\s/g, ''));
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return new TextDecoder().decode(bytes);
+    }
+
+    function applyScheduleData(data) {
+      if (Array.isArray(data)) {
+        events = data;
+        return true;
       }
-    }
-
-    function saveEvents() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
-      renderTimetable();
-    }
-
-    /* Load the shared schedule from events.json (hosted only).
-       If the file's version is newer than what this device has, it replaces the local copy. */
-    async function syncFromServer() {
-      try {
-        const res = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: 'no-store' });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!data || !Array.isArray(data.events)) return;
-
-        const remoteVersion = Number(data.version) || 0;
-        const localVersion = Number(localStorage.getItem(DATA_VERSION_KEY)) || 0;
-        if (remoteVersion <= localVersion) return;
-
+      if (data && Array.isArray(data.events)) {
         events = data.events;
-        if (data.title) {
-          document.getElementById('timetableTitle').innerText = data.title;
-          localStorage.setItem(TITLE_STORAGE_KEY, data.title);
+        if (data.title) document.getElementById('timetableTitle').innerText = data.title;
+        return true;
+      }
+      return false;
+    }
+
+    /* Load the published schedule from GitHub (public read). Falls back to baked-in defaults. */
+    async function loadFromGitHub() {
+      try {
+        const res = await fetch(`${GH_API_FILE}?ref=${GH_BRANCH}&t=${Date.now()}`, { cache: 'no-store' });
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.content) {
+            if (applyScheduleData(JSON.parse(base64ToUtf8(json.content)))) return;
+          }
         }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
-        localStorage.setItem(DATA_VERSION_KEY, String(remoteVersion));
-        renderTimetable();
+      } catch (e) { /* ignore */ }
+
+      try {
+        const res = await fetch(`${GH_RAW_FILE}?t=${Date.now()}`, { cache: 'no-store' });
+        if (res.ok) {
+          if (applyScheduleData(await res.json())) return;
+        }
+      } catch (e) { /* ignore */ }
+
+      events = cloneDefaultEvents();
+    }
+
+    /* Called after every edit. Deliberately does NOT save locally. */
+    function saveEvents() {
+      renderTimetable();
+      markDirty();
+    }
+
+    function getToken() {
+      let token = localStorage.getItem(GH_TOKEN_KEY);
+      if (!token) {
+        token = prompt(`Vnesi GitHub žeton (fine-grained, Contents: Read and write) za ${GH_OWNER}/${GH_REPO}:`);
+        if (token && token.trim()) {
+          token = token.trim();
+          localStorage.setItem(GH_TOKEN_KEY, token);
+        } else {
+          return null;
+        }
+      }
+      return token;
+    }
+
+    async function publishEvents() {
+      if (!dirty) return;
+      const token = getToken();
+      if (!token) return;
+
+      const btn = document.getElementById('publishBtn');
+      const label = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = 'Objavljam...'; }
+
+      try {
+        const payload = { version: Date.now(), title: currentTitle(), events };
+        const contentB64 = utf8ToBase64(JSON.stringify(payload, null, 2));
+        const headers = { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' };
+
+        let sha = null;
+        const getRes = await fetch(`${GH_API_FILE}?ref=${GH_BRANCH}&t=${Date.now()}`, { headers, cache: 'no-store' });
+        if (getRes.ok) {
+          sha = (await getRes.json()).sha;
+        } else if (getRes.status === 401 || getRes.status === 403) {
+          localStorage.removeItem(GH_TOKEN_KEY);
+          throw new Error('Žeton ni veljaven ali nima pravic. Poskusi znova in vnesi pravi žeton.');
+        }
+
+        const body = { message: 'Posodobi urnik', content: contentB64, branch: GH_BRANCH };
+        if (sha) body.sha = sha;
+
+        const putRes = await fetch(GH_API_FILE, {
+          method: 'PUT',
+          headers: Object.assign({ 'Content-Type': 'application/json' }, headers),
+          body: JSON.stringify(body)
+        });
+
+        if (!putRes.ok) {
+          const errText = await putRes.text();
+          throw new Error('Objava ni uspela (' + putRes.status + '). ' + errText.slice(0, 180));
+        }
+
+        dirty = false;
+        setStatus();
+        alert('Objavljeno! Spremembe bodo na vseh napravah vidne po osvežitvi.');
       } catch (err) {
-        // file:// or offline — just keep the local copy
+        alert('Napaka: ' + err.message);
+      } finally {
+        if (btn) { btn.textContent = label; btn.disabled = !dirty; }
       }
     }
 
@@ -1552,13 +1677,17 @@
       renderTimetable();
     };
 
-    /* Reset button */
-    document.getElementById('resetBtn').onclick = () => {
-      if (confirm('Ali želiš povrniti urnik na začetno stanje? Vse vaše spremembe bodo ponastavljene.')) {
-        events = cloneDefaultEvents();
-        saveEvents();
-      }
+    /* Discard unpublished edits and reload the published schedule */
+    document.getElementById('resetBtn').onclick = async () => {
+      if (dirty && !confirm('Prekliči vse neobjavljene spremembe in naloži objavljeno različico?')) return;
+      await loadFromGitHub();
+      dirty = false;
+      renderTimetable();
+      setStatus();
     };
+
+    /* Publish the current schedule to GitHub */
+    document.getElementById('publishBtn').onclick = publishEvents;
 
     /* Export events to events.json (ready to upload to the site for all devices) */
     document.getElementById('exportBtn').onclick = () => {
@@ -1594,13 +1723,7 @@
             events = data;
           } else if (data && Array.isArray(data.events)) {
             events = data.events;
-            if (data.title) {
-              document.getElementById('timetableTitle').innerText = data.title;
-              localStorage.setItem(TITLE_STORAGE_KEY, data.title);
-            }
-            if (data.version) {
-              localStorage.setItem(DATA_VERSION_KEY, String(data.version));
-            }
+            if (data.title) document.getElementById('timetableTitle').innerText = data.title;
           } else {
             throw new Error('invalid');
           }
@@ -1618,7 +1741,7 @@
     const titleEl = document.getElementById('timetableTitle');
     titleEl.addEventListener('input', () => {
       if (titleEl.innerText.trim() === '') return;
-      localStorage.setItem(TITLE_STORAGE_KEY, titleEl.innerText.trim());
+      markDirty();
     });
     titleEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -1641,13 +1764,19 @@
     });
 
     /* Initialize Application */
-    window.addEventListener('DOMContentLoaded', () => {
-      loadEvents();
-      loadTitle();
+    window.addEventListener('DOMContentLoaded', async () => {
       buildGrid();
+      await loadFromGitHub();
       renderTimetable();
       setupDragInteraction();
-      syncFromServer();
+      setStatus();
+    });
+
+    window.addEventListener('beforeunload', (e) => {
+      if (dirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
     });
   </script>
 </body>
