@@ -1760,6 +1760,16 @@
       if (e.target === helpBackdrop) helpBackdrop.classList.remove('open');
     });
 
+    /* Publish is only offered when the file is opened locally (file://).
+       On the hosted site the button is hidden so visitors can't publish. */
+    function enableLocalOnlyControls() {
+      if (location.protocol === 'file:') return;
+      const publishBtn = document.getElementById('publishBtn');
+      const statusMsg = document.getElementById('statusMsg');
+      if (publishBtn) publishBtn.style.display = 'none';
+      if (statusMsg) statusMsg.style.display = 'none';
+    }
+
     /* Initialize Application */
     window.addEventListener('DOMContentLoaded', async () => {
       buildGrid();
@@ -1767,6 +1777,7 @@
       renderTimetable();
       setupDragInteraction();
       setStatus();
+      enableLocalOnlyControls();
     });
 
     window.addEventListener('beforeunload', (e) => {
