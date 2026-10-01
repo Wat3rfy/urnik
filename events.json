@@ -1,5 +1,5 @@
 {
-  "version": 1790692092595,
+  "version": 1790858852254,
   "title": "FRI Zimski Semester 2026/2027",
   "events": [
     {
@@ -11,7 +11,7 @@
       "day": 0,
       "startMinutes": 480,
       "endMinutes": 660,
-      "color": "#d39fe6",
+      "color": "#f9be7d",
       "info": ""
     },
     {
@@ -23,7 +23,7 @@
       "day": 2,
       "startMinutes": 1020,
       "endMinutes": 1140,
-      "color": "#a9dfbf",
+      "color": "#9ec8ff",
       "info": "",
       "lane": 0
     },
@@ -36,7 +36,7 @@
       "day": 1,
       "startMinutes": 780,
       "endMinutes": 900,
-      "color": "#c9cbe8",
+      "color": "#9eecff",
       "info": "",
       "lane": 0
     },
@@ -49,7 +49,7 @@
       "day": 0,
       "startMinutes": 840,
       "endMinutes": 1020,
-      "color": "#fcf4a3",
+      "color": "#ffd970",
       "info": ""
     },
     {
@@ -61,7 +61,7 @@
       "day": 0,
       "startMinutes": 660,
       "endMinutes": 840,
-      "color": "#fcd1db",
+      "color": "#ffeaa7",
       "info": "",
       "lane": 1
     },
@@ -74,7 +74,7 @@
       "day": 1,
       "startMinutes": 900,
       "endMinutes": 1020,
-      "color": "#a3c7e8",
+      "color": "#ade4ff",
       "info": "",
       "lane": 0
     },
@@ -111,7 +111,7 @@
       "day": 0,
       "startMinutes": 960,
       "endMinutes": 1080,
-      "color": "#d8f3b2",
+      "color": "#a3c7e8",
       "info": "",
       "lane": 1
     },
@@ -137,7 +137,7 @@
       "day": 3,
       "startMinutes": 480,
       "endMinutes": 600,
-      "color": "#74c0e7"
+      "color": "#9fbcfe"
     },
     {
       "id": "ev_1790687694209_g1fqt",
@@ -149,7 +149,7 @@
       "day": 3,
       "startMinutes": 900,
       "endMinutes": 960,
-      "color": "#f7febe"
+      "color": "#94d6ff"
     },
     {
       "id": "ev_1790687898497_3whi4",
@@ -161,7 +161,7 @@
       "day": 3,
       "startMinutes": 960,
       "endMinutes": 1080,
-      "color": "#fcf4a3"
+      "color": "#7cccfe"
     },
     {
       "id": "ev_1790687921331_oyogd",
@@ -173,7 +173,7 @@
       "day": 3,
       "startMinutes": 1080,
       "endMinutes": 1200,
-      "color": "#f9be7d"
+      "color": "#b2bec3"
     },
     {
       "id": "ev_1790687953463_eixle",
@@ -185,7 +185,7 @@
       "day": 4,
       "startMinutes": 780,
       "endMinutes": 900,
-      "color": "#d8f3b2"
+      "color": "#fedb7c"
     },
     {
       "id": "ev_1790687992469_gkwpd",
@@ -197,7 +197,7 @@
       "day": 4,
       "startMinutes": 600,
       "endMinutes": 780,
-      "color": "#fcd1db"
+      "color": "#ffa552"
     }
   ]
 }
