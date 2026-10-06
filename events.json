@@ -1,5 +1,5 @@
 {
-  "version": 1790858898804,
+  "version": 1791316419740,
   "title": "FRI Zimski Semester 2026/2027",
   "events": [
     {
@@ -103,19 +103,6 @@
       "info": ""
     },
     {
-      "id": "9",
-      "title": "Rač. grafika in tehnologija iger",
-      "type": "LV",
-      "room": "PR15",
-      "lecturer": "Hmmmmm???",
-      "day": 0,
-      "startMinutes": 960,
-      "endMinutes": 1080,
-      "color": "#a3c7e8",
-      "info": "",
-      "lane": 1
-    },
-    {
       "id": "10",
       "title": "Postopki Razvoja Prog. Opreme",
       "type": "P",
@@ -198,6 +185,18 @@
       "startMinutes": 600,
       "endMinutes": 780,
       "color": "#ffa552"
+    },
+    {
+      "id": "ev_1791315561483_7vsil",
+      "title": "Rač. grafika in tehnologija iger",
+      "type": "LV",
+      "room": "PR09",
+      "lecturer": "Gorazd Gorup",
+      "info": "",
+      "day": 4,
+      "startMinutes": 960,
+      "endMinutes": 1080,
+      "color": "#a3c7e8"
     }
   ]
 }
