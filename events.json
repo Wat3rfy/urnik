@@ -1,5 +1,5 @@
 {
-  "version": 1792445335088,
+  "version": 1792445739145,
   "title": "FRI Zimski Semester 2026/2027",
   "events": [
     {
@@ -42,7 +42,7 @@
     },
     {
       "id": "4",
-      "title": "Inteligentni Sistemi",
+      "title": "IS",
       "type": "P",
       "room": "P22",
       "lecturer": "Marko Robnik Šikonja",
@@ -67,14 +67,14 @@
     },
     {
       "id": "6",
-      "title": "Postopki Razvoja Prog. Opreme",
+      "title": "PRPO",
       "type": "LV",
       "room": "PR06",
       "lecturer": "???",
       "day": 1,
       "startMinutes": 900,
       "endMinutes": 1020,
-      "color": "#b8e7ff",
+      "color": "#ebebeb",
       "info": "",
       "lane": 0
     },
@@ -190,7 +190,7 @@
     },
     {
       "id": "ev_1791315561483_7vsil",
-      "title": "Rač. grafika in tehnologija iger",
+      "title": "RGTI",
       "type": "LV",
       "room": "PR09",
       "lecturer": "Gorazd Gorup",
@@ -203,7 +203,7 @@
     },
     {
       "id": "ev_1792444863954_yxm2t",
-      "title": "Osnove Umetne Inteligence",
+      "title": "OUI",
       "type": "LV",
       "room": "PR16",
       "lecturer": "",
@@ -213,6 +213,19 @@
       "endMinutes": 1020,
       "color": "#a3e0ff",
       "lane": 1
+    },
+    {
+      "id": "ev_1792445687752_g9f9r",
+      "title": "RGTI",
+      "type": "LV",
+      "room": "",
+      "lecturer": "",
+      "info": "",
+      "day": 0,
+      "startMinutes": 960,
+      "endMinutes": 1080,
+      "color": "#a3c7e8",
+      "lane": 2
     }
   ]
 }
