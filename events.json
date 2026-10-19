@@ -1,5 +1,5 @@
 {
-  "version": 1792445211817,
+  "version": 1792445335088,
   "title": "FRI Zimski Semester 2026/2027",
   "events": [
     {
@@ -125,7 +125,7 @@
       "day": 3,
       "startMinutes": 720,
       "endMinutes": 840,
-      "color": "#9fbcfe",
+      "color": "#ffffff",
       "lane": 0
     },
     {
