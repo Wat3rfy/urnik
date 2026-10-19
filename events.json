@@ -1,5 +1,5 @@
 {
-  "version": 1791316419740,
+  "version": 1792445211817,
   "title": "FRI Zimski Semester 2026/2027",
   "events": [
     {
@@ -84,11 +84,12 @@
       "type": "LV",
       "room": "PR09",
       "lecturer": "Jer Pelhan",
-      "day": 2,
-      "startMinutes": 480,
-      "endMinutes": 600,
-      "color": "#d9d9d9",
-      "info": ""
+      "day": 3,
+      "startMinutes": 600,
+      "endMinutes": 720,
+      "color": "#c1d0f0",
+      "info": "",
+      "lane": 0
     },
     {
       "id": "8",
@@ -116,15 +117,16 @@
     },
     {
       "id": "ev_1790687584393_a4j95",
-      "title": "Verejetnostni Račun in Statistika",
+      "title": "Verjetnostni Račun in Statistika",
       "type": "LV",
       "room": "2.04",
       "lecturer": "Lazić",
       "info": "",
       "day": 3,
-      "startMinutes": 480,
-      "endMinutes": 600,
-      "color": "#9fbcfe"
+      "startMinutes": 720,
+      "endMinutes": 840,
+      "color": "#9fbcfe",
+      "lane": 0
     },
     {
       "id": "ev_1790687694209_g1fqt",
@@ -193,10 +195,24 @@
       "room": "PR09",
       "lecturer": "Gorazd Gorup",
       "info": "",
-      "day": 4,
+      "day": 1,
       "startMinutes": 960,
       "endMinutes": 1080,
-      "color": "#a3c7e8"
+      "color": "#a3c7e8",
+      "lane": 1
+    },
+    {
+      "id": "ev_1792444863954_yxm2t",
+      "title": "Osnove Umetne Inteligence",
+      "type": "LV",
+      "room": "PR16",
+      "lecturer": "",
+      "info": "",
+      "day": 0,
+      "startMinutes": 900,
+      "endMinutes": 1020,
+      "color": "#a3e0ff",
+      "lane": 1
     }
   ]
 }
